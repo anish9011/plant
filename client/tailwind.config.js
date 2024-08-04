@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        whiteSmoke: '#f5f5f5', // Add whiteSmoke color
+      },
+    },
   },
   plugins: [require('@tailwindcss/aspect-ratio'),],
 }

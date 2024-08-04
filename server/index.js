@@ -17,7 +17,18 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 
+const UserCartSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  imageSrc: { type: String, required: true },
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+  addedAt: { type: Date, default: Date.now } // Add timestamp for sorting
+});
+
 const User = mongoose.model("User", UserSchema, "Users");
+const UserCart = mongoose.model("UserCart", UserCartSchema, "UserCart");
+
 
 app.use(express.json());
 app.use(cors());
@@ -64,6 +75,66 @@ app.post("/signin", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+// POST endpoint to add items to the cart
+app.post("/cart", async (req, res) => {
+  const { id, imageSrc, name, price, quantity } = req.body;
+
+  // Validate request data
+  if (!id || !imageSrc || !name || !price || !quantity) {
+    return res.status(400).json({ message: "Invalid request data" });
+  }
+
+  try {
+    // Check if the item already exists in the cart
+    const existingCartItem = await UserCart.findOne({ id });
+
+    if (existingCartItem) {
+      // Update the quantity of the existing item
+      existingCartItem.quantity += quantity;
+      await existingCartItem.save();
+    } else {
+      // Create a new cart item
+      const newCartItem = new UserCart({ id, imageSrc, name, price, quantity });
+      await newCartItem.save();
+    }
+
+    // Respond with success
+    return res.status(201).json({ message: "Add-to-Cart successful" });
+  } catch (error) {
+    // Log the error for debugging
+    console.error("Add-to-Cart error:", error);
+
+    // Respond with a generic error message
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
+// GET route to retrieve items from the cart
+app.get('/cart', async (req, res) => {
+  try {
+    // Fetch all cart items from the database and sort by 'addedAt' timestamp
+    const cartItems = await UserCart.find().sort({ addedAt: -1 });
+    return res.status(200).json(cartItems);
+  } catch (error) {
+    console.error("Get-Cart error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.delete('/cart/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await UserCart.deleteOne({ id: parseInt(id) });
+    return res.status(200).json({ message: 'Item removed successfully' });
+  } catch (error) {
+    console.error('Remove item error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`Server is running on http://127.0.0.1:${PORT}`);
