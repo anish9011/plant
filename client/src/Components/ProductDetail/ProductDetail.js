@@ -1,10 +1,11 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '../Context/ProductsContext';
 import ProductList from '../Home/ProductList';
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
+// Function to get product IDs
+export function getProductIds(products) {
+  return products.map(product => product.id);
 }
 
 export default function ProductDetail() {
@@ -12,13 +13,17 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const products = useProducts();
   const product = products.find((p) => p.id === parseInt(id, 10));
-  const [quantity, setQuantity] = useState(1); // State for quantity
+  const [quantity, setQuantity] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [existingQuantity, setExistingQuantity] = useState(0);
+
+  // Use the function to get product IDs
+  const productIds = getProductIds(products);
+  console.log(productIds); // This will log the array of product IDs
 
   if (!product) {
-    return <ProductList/>;
+    return <ProductList />;
   }
-
-
 
   const handleAddToBag = async () => {
     const itemDetails = {
@@ -28,7 +33,7 @@ export default function ProductDetail() {
       price: product.price,
       quantity: quantity
     };
-  
+
     try {
       const response = await fetch("http://localhost:5000/cart", {
         method: "POST",
@@ -37,19 +42,60 @@ export default function ProductDetail() {
         },
         body: JSON.stringify(itemDetails)
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
-        console.log(result.message);
-        navigate(`/bag/${product.id}`);
+        if (result.message === "Item already in cart") {
+          setExistingQuantity(result.currentQuantity);
+          setIsModalOpen(true);
+        } else {
+          navigate(`/bag/${product.id}`);
+          console.log(result.message);
+        }
       } else {
         console.error(result.message);
         alert("Failed to add item to bag: " + result.message);
       }
     } catch (error) {
-      console.error("Error adding item to bag:", error);
-      alert("An error occurred while adding the item to the bag.");
+      console.error("Error handling item:", error);
+      alert("An error occurred while handling the item.");
+    }
+  };
+
+  const handleConfirmIncrease = async () => {
+    const updatedItemDetails = {
+      id: product.id,
+      imageSrc: product.imageSrc,
+      name: product.name,
+      price: product.price,
+      quantity: existingQuantity + quantity
+    };
+
+    try {
+      const updateResponse = await fetch(`http://localhost:5000/cart/${product.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updatedItemDetails)
+      });
+
+      const updateResult = await updateResponse.json();
+
+      if (updateResponse.ok) {
+        console.log(updateResult.message);
+        navigate(`/bag/${product.id}`);
+
+      } else {
+        console.error(updateResult.message);
+        alert("Failed to update item quantity: " + updateResult.message);
+      }
+    } catch (error) {
+      console.error("Error updating item quantity:", error);
+      alert("An error occurred while updating the item quantity.");
+    } finally {
+      setIsModalOpen(false);
     }
   };
 
@@ -105,23 +151,21 @@ export default function ProductDetail() {
                 <div className="flex items-center border text-white bg-indigo-600 rounded-md">
                   <button
                     type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))} // Decrease quantity
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="px-3 py-1 text-white hover:text-black hover:bg-white font-bold"
-
                   >
                     -
                   </button>
                   <input
                     type="text"
                     value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} // Handle input change
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
                     className="w-16 text-center border-0 focus:ring-0 bg-indigo-600"
                   />
                   <button
                     type="button"
-                    onClick={() => setQuantity(quantity + 1)} // Increase quantity
+                    onClick={() => setQuantity(quantity + 1)}
                     className="px-3 py-1 text-white hover:text-black hover:bg-white font-bold"
-
                   >
                     +
                   </button>
@@ -130,7 +174,6 @@ export default function ProductDetail() {
             </div>
 
             <div className="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pb-16 lg:pr-8 lg:pt-6">
-              {/* Description and details */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Description</h3>
                 <p className="mt-4 text-base text-gray-900">{product.description}</p>
@@ -146,6 +189,35 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* Inline Modal Component */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Confirm Quantity Increase
+            </h3>
+            <p className="text-gray-700 mb-4">
+              The product is already in your bag with a quantity of {existingQuantity}. Do you want to increase the quantity by {quantity}?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={handleConfirmIncrease}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ProductList />
     </>
   );

@@ -1,35 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import ProductDetail from '../ProductDetail/ProductDetail';
+import { getProductIds } from '../ProductDetail/ProductDetail'; // Import the function
+import { useNavigate } from 'react-router-dom';
 
 export default function Bag() {
   const [open, setOpen] = useState(true);
   const [cartItems, setCartItems] = useState([]);
   // const products = useProducts();
   // const product = products.find((p) => p.id === parseInt(id));
-
+  const navigate = useNavigate();
   useEffect(() => {
-
-    const fetchCartItems = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/cart");
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        console.log('Fetched Cart Items:', data); // Debugging line
-        setCartItems(data);
-      } catch (error) {
-        console.error('Error fetching cart items:', error);
-      }
-    };
-    
     fetchCartItems();
-  }, [cartItems]);
-
+  }, []); // Empty array to fetch only once on mount
+  
   // Fetch cart items
   const fetchCartItems = async () => {
-    
     try {
       const response = await fetch("http://localhost:5000/cart");
       if (!response.ok) throw new Error('Network response was not ok');
@@ -62,9 +48,15 @@ export default function Bag() {
     return cartItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
 
+  // Example usage of getProductIds
+  // const productIds = getProductIds(cartItems); // Assuming you have products data
+ 
+  const handleClose = ()=>{
+    navigate('/productlist');
+  }
+
   return (
     <>
-      <ProductDetail />
       <Dialog open={open} onClose={() => setOpen(false)} className="relative z-10">
         <DialogBackdrop
           transition
@@ -84,7 +76,7 @@ export default function Bag() {
                       <div className="ml-3 flex h-7 items-center">
                         <button
                           type="button"
-                          onClick={() => setOpen(false)}
+                          onClick={handleClose}
                           className="relative -m-2 p-2 text-gray-400 hover:text-gray-500"
                         >
                           <span className="absolute -inset-0.5" />
@@ -107,7 +99,7 @@ export default function Bag() {
                                 />
                               </div>
                               <div className="ml-4 flex flex-1 flex-col">
-                                <div>
+                                
                                   <div className="flex justify-between text-base font-medium text-gray-900">
                                     <h3>
                                       <a href={item.href}>{item.name}</a>
@@ -128,9 +120,8 @@ export default function Bag() {
                                     </button>
                                   </div>
                                 </div>
-                              </div>
-                            </li>
-                          ))}
+                              </li>
+                            ))}
                         </ul>
                       </div>
                     </div>

@@ -110,14 +110,15 @@ const Header = () => {
             <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
               Marketplace
             </a>
+
             <button onClick={handleBag} className="text-sm font-semibold leading-6 text-gray-900 flex items-center space-x-2">
-             Bag &nbsp;<img src="bag.png" alt="Shopping Bag" className="h-5 w-5" />
+           <img src="animcart.gif" alt="Shopping Bag" className="h-9 w-9" />
              </button>
-
-
+            
           </PopoverGroup>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             {/* Updated login link to use button and handleLogin function */}
+
             <button onClick={handleLogin} className="text-sm font-semibold leading-6 text-gray-900">
               Log in <span aria-hidden="true">&rarr;</span>
             </button>
