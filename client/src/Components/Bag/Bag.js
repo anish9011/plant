@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { getProductIds } from '../ProductDetail/ProductDetail'; // Import the function
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../Context/UserContext';
+import { usePrice } from '../Context/PriceContext';
 
 export default function Bag() {
   const [open, setOpen] = useState(true);
   const [cartItems, setCartItems] = useState([]);
-  // const products = useProducts();
-  // const product = products.find((p) => p.id === parseInt(id));
+  const { user } = useUser(); 
+  const { price, updatePrice } = usePrice();
   const navigate = useNavigate();
+
   useEffect(() => {
     fetchCartItems();
   }, []); // Empty array to fetch only once on mount
-  
-  // Fetch cart items
+
+  useEffect(() => {
+    const subtotal = cartItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+    updatePrice(subtotal); // Update price in context
+  }, [cartItems, updatePrice]);
+
   const fetchCartItems = async () => {
     try {
-      const response = await fetch("http://localhost:5000/cart");
+      const response = await fetch(`http://localhost:5000/cart?email=${user.email}`);
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       console.log('Fetched Cart Items:', data); // Debugging line
@@ -27,33 +33,39 @@ export default function Bag() {
     }
   };
 
-  // Remove item from cart
   const removeItemFromCart = async (itemId) => {
     try {
       const response = await fetch(`http://localhost:5000/cart/${itemId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: user.email })
       });
+
       if (response.ok) {
         fetchCartItems(); // Refresh cart items
+        setOpen(true);
       } else {
-        console.error('Failed to remove item from cart');
+        const errorData = await response.json();
+        console.error('Failed to remove item from cart:', errorData.message);
       }
     } catch (error) {
       console.error('Error removing item from cart:', error);
     }
   };
 
-  // Calculate subtotal
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
 
-  // Example usage of getProductIds
-  // const productIds = getProductIds(cartItems); // Assuming you have products data
- 
-  const handleClose = ()=>{
-    navigate('/productlist');
-  }
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleCheckout = () => {
+    navigate('/checkout');
+  };
 
   return (
     <>
@@ -99,29 +111,28 @@ export default function Bag() {
                                 />
                               </div>
                               <div className="ml-4 flex flex-1 flex-col">
-                                
-                                  <div className="flex justify-between text-base font-medium text-gray-900">
-                                    <h3>
-                                      <a href={item.href}>{item.name}</a>
-                                    </h3>
-                                    <p className="ml-4">&#x20B9;{item.price}</p>
-                                  </div>
-                                  <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                                <div className="flex justify-between text-base font-medium text-gray-900">
+                                  <h3>
+                                    <a href={item.href}>{item.name}</a>
+                                  </h3>
+                                  <p className="ml-4">&#x20B9;{item.price}</p>
                                 </div>
-                                <div className="flex flex-1 items-end justify-between text-sm">
-                                  <p className="text-gray-500">Qty {item.quantity || 0}</p> {/* Default to 0 if quantity is missing */}
-                                  <div className="flex">
-                                    <button
-                                      type="button"
-                                      className="font-medium text-indigo-600 hover:text-indigo-500"
-                                      onClick={() => removeItemFromCart(item.id)}
-                                    >
-                                      Remove
-                                    </button>
-                                  </div>
+                                <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                              </div>
+                              <div className="flex flex-1 items-end justify-between text-sm">
+                                <p className="text-gray-500">Qty {item.quantity || 0}</p> {/* Default to 0 if quantity is missing */}
+                                <div className="flex">
+                                  <button
+                                    type="button"
+                                    className="font-medium text-indigo-600 hover:text-indigo-500"
+                                    onClick={() => removeItemFromCart(item.id)}
+                                  >
+                                    Remove
+                                  </button>
                                 </div>
-                              </li>
-                            ))}
+                              </div>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     </div>
@@ -137,6 +148,7 @@ export default function Bag() {
                       <a
                         href="#"
                         className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                        onClick={handleCheckout}
                       >
                         Checkout
                       </a>

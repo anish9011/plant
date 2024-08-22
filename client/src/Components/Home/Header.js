@@ -112,8 +112,15 @@ const Header = () => {
             </a>
 
             <button onClick={handleBag} className="text-sm font-semibold leading-6 text-gray-900 flex items-center space-x-2">
-           <img src="animcart.gif" alt="Shopping Bag" className="h-9 w-9" />
-             </button>
+      <lord-icon
+        src="https://cdn.lordicon.com/odavpkmb.json"
+        trigger="hover"
+        stroke="bold"
+        style={{ width: '45px', height: '45px' }}
+      ></lord-icon>
+      Bag
+    </button>
+
             
           </PopoverGroup>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // useNavigate instead of useHistory
+import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../Context/UserContext';
 import './Signin.css';
 
 const Signin = () => {
@@ -7,7 +8,8 @@ const Signin = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // useNavigate instead of useHistory
+  const navigate = useNavigate();
+  const { updateEmail } = useUser(); // Access UserContext
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +27,9 @@ const Signin = () => {
         console.log('Signin successful!');
         setMessage('Signin Successful');
         setError('');
-        navigate('/productlist'); // use navigate instead of history.push
+        updateEmail(email); // Update email in UserContext
+        console.log(updateEmail);
+        navigate('/productlist');
       } else {
         const data = await response.json();
         setError(data.message || 'Signin failed');

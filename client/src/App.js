@@ -7,19 +7,28 @@ import { ProductsProvider } from './Components/Context/ProductsContext';
 import ProductDetail from './Components/ProductDetail/ProductDetail';
 import Bag from './Components/Bag/Bag';
 import Header from './Components/Home/Header';
+import { UserProvider } from './Components/Context/UserContext';
+import CheckOut from './Components/CheckOut/CheckOut';
+import {PriceProvider} from './Components/Context/PriceContext';
 
 const App = () => {
   return (
     <Router>
       <ProductsProvider>
-        <Routes>
-          <Route exact path="/" element={<><Header/><Signin/></>} />
-          <Route path="/signup" element={<><Header/><Signup /></>} />
-          <Route path="/productlist" element={<><Header/><ProductList /></>} />
-          <Route path="/productdetail/:id" element={<><Header/><ProductDetail /></>} />
-          <Route path="/bag/:id" element={<><Header/><ProductDetail /><Bag /></>} />
-          <Route path="/bag" element={<><Header/><Bag /><ProductList /></>} />
-        </Routes>
+        <UserProvider>
+          <PriceProvider>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Signin />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/productlist" element={<ProductList />} />
+            <Route path="/productdetail/:id" element={<ProductDetail />} />
+            <Route path="/bag/:id" element={<><ProductDetail /><Bag /></>} />
+            <Route path="/bag" element={<><Bag /><ProductList /></>} />
+            <Route path="/checkout" element={<><CheckOut/></>} />
+          </Routes>
+          </PriceProvider>
+        </UserProvider>
       </ProductsProvider>
     </Router>
   );

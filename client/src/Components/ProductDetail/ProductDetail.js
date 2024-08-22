@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '../Context/ProductsContext';
+import { useUser } from '../Context/UserContext';
 import ProductList from '../Home/ProductList';
 
 // Function to get product IDs
@@ -12,6 +13,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const products = useProducts();
+  const { user } = useUser(); // Access UserContext
   const product = products.find((p) => p.id === parseInt(id, 10));
   const [quantity, setQuantity] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +29,7 @@ export default function ProductDetail() {
 
   const handleAddToBag = async () => {
     const itemDetails = {
+      email: user.email, // Use email from UserContext
       id: product.id,
       imageSrc: product.imageSrc,
       name: product.name,
@@ -65,6 +68,7 @@ export default function ProductDetail() {
 
   const handleConfirmIncrease = async () => {
     const updatedItemDetails = {
+      email: user.email, // Use email from UserContext
       id: product.id,
       imageSrc: product.imageSrc,
       name: product.name,
