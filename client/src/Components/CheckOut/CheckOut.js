@@ -186,7 +186,17 @@ const CheckOut = () => {
               required
             />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1">
+            <label htmlFor="deliveryInstructions" className="block text-sm font-medium text-gray-700">Price</label>
+            <textarea
+              id="price"
+              name="price"
+              value={price}
+              onChange={handleChange}
+              className="w-full p-1 border font-bold  text-red-600 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="col-span-1">
             <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">Payment Method</label>
             <select
               id="paymentMethod"
@@ -196,8 +206,6 @@ const CheckOut = () => {
               className="w-full p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="COD">Cash on Delivery</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="PayPal">PayPal</option>
             </select>
           </div>
           <div className="col-span-2">
@@ -222,7 +230,9 @@ const CheckOut = () => {
               required
             />
           </div>
+
         </div>
+        
         <div className="flex justify-center mt-8">
           <button
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
