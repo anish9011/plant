@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { usePrice } from '../Context/PriceContext'; 
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../Context/UserContext';
-
+import './CheckOut.css';
 const CheckOut = () => {
   const { user } = useUser(); 
   const { price } = usePrice(); 
@@ -72,6 +72,7 @@ const CheckOut = () => {
   
       const result = await response.json();
       setModalMessage('Order Confirmed! Thank you for your purchase.');
+   
       setIsModalOpen(true);
       console.log('Success:', result);
     } catch (error) {

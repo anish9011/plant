@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -7,9 +7,17 @@ const Signup = () => {
   const [confirmpassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const navigate =  useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmpassword) {
+      setError('Passwords do not match');
+      setMessage('');
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:5000/signup', {
@@ -17,7 +25,11 @@ const Signup = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          role: isAdmin ? 'admin' : 'user',
+        }), // Include role
       });
 
       if (response.ok) {
@@ -26,6 +38,7 @@ const Signup = () => {
         setError('');
         setEmail('');
         setPassword('');
+        setConfirmPassword('');
         navigate('/');
       } else {
         const data = await response.json();
@@ -81,14 +94,12 @@ const Signup = () => {
           </div>
 
           <div>
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Password
-              </label>
-            </div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Password
+            </label>
             <div className="mt-2">
               <input
                 id="password"
@@ -102,19 +113,18 @@ const Signup = () => {
               />
             </div>
           </div>
-          {/* <div>
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-               Confirm Password
-              </label>
-            </div>
+
+          <div>
+            <label
+              htmlFor="confirmpassword"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Confirm Password
+            </label>
             <div className="mt-2">
               <input
-                id="password"
-                name="password"
+                id="confirmpassword"
+                name="confirmpassword"
                 type="password"
                 autoComplete="new-password"
                 value={confirmpassword}
@@ -123,7 +133,19 @@ const Signup = () => {
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
             </div>
-          </div> */}
+          </div>
+
+          <div className="mt-4">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                className="form-checkbox"
+                checked={isAdmin}
+                onChange={() => setIsAdmin(prev => !prev)}
+              />
+              <span className="ml-2 text-gray-700">Sign up as Admin</span>
+            </label>
+          </div>
 
           <button
             type="submit"
@@ -131,6 +153,7 @@ const Signup = () => {
           >
             Sign Up
           </button>
+
           {message && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4" role="alert">
               <div className="flex items-center">
@@ -143,7 +166,7 @@ const Signup = () => {
               </div>
             </div>
           )}
-         
+
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
               <div className="flex items-center">

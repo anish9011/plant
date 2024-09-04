@@ -10,6 +10,9 @@ import Header from './Components/Home/Header';
 import { UserProvider } from './Components/Context/UserContext';
 import CheckOut from './Components/CheckOut/CheckOut';
 import {PriceProvider} from './Components/Context/PriceContext';
+import Admin from './Components/Admin/Admin';
+import AddProduct from './Components/Admin/AddProduct';
+import GetProduct from './Components/Admin/GetProduct';
 
 const App = () => {
   return (
@@ -26,6 +29,9 @@ const App = () => {
             <Route path="/bag/:id" element={<><ProductDetail /><Bag /></>} />
             <Route path="/bag" element={<><Bag /><ProductList /></>} />
             <Route path="/checkout" element={<><CheckOut/></>} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/addproduct" element={<AddProduct />} />
+            <Route path="/admin/getproduct" element={<GetProduct/>} />
           </Routes>
           </PriceProvider>
         </UserProvider>

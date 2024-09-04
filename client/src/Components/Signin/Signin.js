@@ -13,7 +13,7 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch('http://localhost:5000/signin', {
         method: 'POST',
@@ -22,14 +22,21 @@ const Signin = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-
+  
       if (response.ok) {
+        const data = await response.json(); // Assuming response includes role
+  
         console.log('Signin successful!');
         setMessage('Signin Successful');
         setError('');
         updateEmail(email); // Update email in UserContext
-        console.log(updateEmail);
-        navigate('/productlist');
+  
+        // Navigate based on user role
+        if (data.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/productlist');
+        }
       } else {
         const data = await response.json();
         setError(data.message || 'Signin failed');
@@ -41,6 +48,7 @@ const Signin = () => {
       setMessage('');
     }
   };
+  
 
   const closeMessage = () => {
     setMessage('');

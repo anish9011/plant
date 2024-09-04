@@ -1,10 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
+const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = "mongodb://127.0.0.1:27017/Plant";
+
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // MongoDB connection setup
 mongoose.connect(MONGODB_URI, {
@@ -16,6 +20,20 @@ mongoose.connect(MONGODB_URI, {
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' }, // Add role field
+});
+
+
+const addProductSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  image: {
+    data: Buffer,
+    contentType: String
+  }
+} ,{
+  timestamps: true
 });
 
 const UserCartNewSchema = new mongoose.Schema({
@@ -47,6 +65,7 @@ const CheckOutSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', UserSchema, 'Users');
+const AddProduct = mongoose.model('AddProduct', addProductSchema,'AddProduct');
 const UserCart = mongoose.model('UserCartNew', UserCartNewSchema, 'UserCartNew');
 const CheckOut = mongoose.model('CheckOut', CheckOutSchema, 'CheckOut');
 
@@ -54,22 +73,27 @@ const CheckOut = mongoose.model('CheckOut', CheckOutSchema, 'CheckOut');
 app.use(cors());
 app.use(express.json());
 
-// Route Handlers
 app.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body; // Include role in the destructuring
+
   try {
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
-    const newUser = new User({ email, password });
+
+    // Create a new user with the provided role
+    const newUser = new User({ email, password, role });
     await newUser.save();
+
     return res.status(201).json({ message: "Signup successful" });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 app.post("/signin", async (req, res) => {
   const { email, password } = req.body;
@@ -81,10 +105,52 @@ app.post("/signin", async (req, res) => {
     if (user.password !== password) {
       return res.status(401).json({ message: "Invalid password" });
     }
-    return res.status(200).json({ message: "Signin successful" });
+    return res.json({ role: user.role }); 
   } catch (error) {
     console.error("Signin error:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Endpoint to upload an image and create a product
+app.post('/admin/addproduct', upload.single('image'), async (req, res) => {
+  if (!req.file || !req.body.id || !req.body.name || !req.body.price) {
+    return res.status(400).send('Missing fields or file.');
+  }
+
+  const addProduct = new AddProduct({
+    id: req.body.id,
+    name: req.body.name,
+    price: req.body.price,
+    image: {
+      data: req.file.buffer,
+      contentType: req.file.mimetype
+    }
+  });
+
+  try {
+    await addProduct.save();
+    res.status(200).send('Product uploaded and saved.');
+  } catch (error) {
+    res.status(500).send('Error uploading product.');
+  }
+});
+
+// Route to fetch all products
+app.get('/admin/getproduct', async (req, res) => {
+  try {
+    const products = await AddProduct.find({}).sort({ createdAt: -1 });
+    // Convert image data to base64 string
+    const productsWithImages = products.map(product => ({
+      ...product.toObject(),
+      image: {
+        data: product.image.data.toString('base64'),
+        contentType: product.image.contentType
+      }
+    }));
+    res.status(200).json(productsWithImages);
+  } catch (error) {
+    res.status(500).send('Server error');
   }
 });
 
@@ -235,6 +301,19 @@ app.post('/checkout', async (req, res) => {
   } catch (error) {
     console.error('Error saving checkout information:', error);
     res.status(500).json({ message: 'Error saving checkout information', error: error.message });
+  }
+});
+
+app.get('/admin', async (req, res) => {
+  try {
+    const checkouts = await CheckOut.find()
+      .populate('user') // Ensure `user` is the correct reference in your schema
+      .sort({ createdAt: -1 }); // Adjust to the correct field if necessary (use `createdAt` if `addedAt` does not exist)
+    
+    res.status(200).json(checkouts);
+  } catch (error) {
+    console.error('Error fetching checkouts:', error); // Log the error for debugging
+    res.status(500).json({ message: 'Error fetching checkouts', error });
   }
 });
 
