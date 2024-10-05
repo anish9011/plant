@@ -13,6 +13,9 @@ import {PriceProvider} from './Components/Context/PriceContext';
 import Admin from './Components/Admin/Admin';
 import AddProduct from './Components/Admin/AddProduct';
 import GetProduct from './Components/Admin/GetProduct';
+import GetProductDetail from './Components/Admin/GetProductDetail';
+import AddToBag from './Components/Admin/AddToBag';
+import MyOrders from './Components/Admin/MyOrders';
 
 const App = () => {
   return (
@@ -27,11 +30,14 @@ const App = () => {
             <Route path="/productlist" element={<ProductList />} />
             <Route path="/productdetail/:id" element={<ProductDetail />} />
             <Route path="/bag/:id" element={<><ProductDetail /><Bag /></>} />
-            <Route path="/bag" element={<><Bag /><ProductList /></>} />
+            <Route path="/bag" element={<><GetProduct/><AddToBag/></>} />
             <Route path="/checkout" element={<><CheckOut/></>} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/addproduct" element={<AddProduct />} />
-            <Route path="/admin/getproduct" element={<GetProduct/>} />
+            <Route path="/getproduct" element={<GetProduct/>} />
+            <Route path="/getproductdetail/:id" element={<GetProductDetail />} />
+            <Route path="/addtobag" element={<><GetProduct/><AddToBag/></>} />
+            <Route path="/myorders" element={<><MyOrders/></>} />
           </Routes>
           </PriceProvider>
         </UserProvider>

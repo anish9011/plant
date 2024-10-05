@@ -106,9 +106,9 @@ export default function ProductDetail() {
   return (
     <>
       <div className="bg-white">
-        <div className="pt-2 sm:pt-8 lg:pt-2">
+        <div className="pt-2 sm:pt-8 lg:pt-2 ">
           {/* Image gallery */}
-          <div className="mx-auto max-w-2xl sm:px-6 lg:max-w-7xl lg:px-8">
+          <div className="mx-auto max-w-2xl sm:px-6 lg:max-w-7xl lg:px-8 ">
             <div className="relative w-full sm:w-3/4 lg:w-1/2 mx-auto">
               <img
                 alt={product.alt}

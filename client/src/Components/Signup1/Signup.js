@@ -135,17 +135,18 @@ const Signup = () => {
             </div>
           </div>
 
-          <div className="mt-4">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                className="form-checkbox"
-                checked={isAdmin}
-                onChange={() => setIsAdmin(prev => !prev)}
-              />
-              <span className="ml-2 text-gray-700">Sign up as Admin</span>
-            </label>
-          </div>
+          <div className="mt-4 hidden">
+  <label className="inline-flex items-center">
+    <input
+      type="checkbox"
+      className="form-checkbox"
+      checked={isAdmin}
+      onChange={() => setIsAdmin(prev => !prev)}
+    />
+    <span className="ml-2 text-gray-700">Sign up as Admin</span>
+  </label>
+</div>
+
 
           <button
             type="submit"

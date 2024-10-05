@@ -49,7 +49,9 @@ const Header = () => {
   navigate('/bag'); // Adjust '/signin' to your actual login route
   };
 
-
+const handleOrder =() =>{
+  navigate('/myorders');
+}
 
   return (
     <>
@@ -73,7 +75,7 @@ const Header = () => {
           </div>
           <PopoverGroup className="hidden lg:flex lg:gap-x-12">
             <Popover className="relative">
-              <PopoverButton className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
+              <PopoverButton className="flex items-center gap-x-1 mt-2 text-sm font-semibold leading-6 text-gray-900">
                 Product
                 <ChevronDownIcon aria-hidden="true" className="h-5 w-5 flex-none text-gray-400" />
               </PopoverButton>
@@ -104,12 +106,12 @@ const Header = () => {
               </PopoverPanel>
             </Popover>
 
-            <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
+            <button href="#" className="text-sm font-semibold leading-6 text-gray-900">
               Company
-            </a>
-            <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
-              Marketplace
-            </a>
+            </button>
+            <button onClick={handleOrder} className="text-sm font-semibold leading-6 text-gray-900">
+              My Orders
+            </button>
 
             <button onClick={handleBag} className="text-sm font-semibold leading-6 text-gray-900 flex items-center space-x-2">
       <lord-icon

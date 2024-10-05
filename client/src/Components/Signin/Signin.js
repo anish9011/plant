@@ -35,7 +35,7 @@ const Signin = () => {
         if (data.role === 'admin') {
           navigate('/admin');
         } else {
-          navigate('/productlist');
+          navigate('/getproduct');
         }
       } else {
         const data = await response.json();
